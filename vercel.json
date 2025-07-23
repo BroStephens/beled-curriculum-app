@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/gpt",
+      "destination": "/api/generate"
+    }
+  ]
+}
