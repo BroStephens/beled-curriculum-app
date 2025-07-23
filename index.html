@@ -41,10 +41,6 @@
       color: #000;
       cursor: pointer;
     }
-    #chatOutput {
-      white-space: pre-wrap;
-      margin-top: 1rem;
-    }
     .tagline {
       color: #87CEFA;
       font-weight: bold;
@@ -65,15 +61,14 @@
     <p class="tagline">Fueling Faith. Forming Disciples.</p>
 
     <div id="signinDiv"></div>
-    <input type="text" id="keyword" placeholder="Enter access code or keyword" />
-    <input type="text" id="prompt" placeholder="Type your Bible class request here..." disabled />
-    <button onclick="getResponse()" disabled id="submitBtn">Generate Lesson</button>
-    <div id="chatOutput"></div>
+    <input type="text" id="keyword" placeholder="Enter access code or keyword" disabled />
+    <button onclick="redirectToGPT()" disabled id="submitBtn">Access Curriculum</button>
   </div>
 
   <script>
     let userEmail = null;
     const keyword = "People of More";
+    const redirectLink = "https://chatgpt.com/g/g-67df00ce9080819185d8710d376128d2-be-led-curriculum";
 
     function initializeGoogleLogin() {
       google.accounts.id.initialize({
@@ -89,7 +84,7 @@
     function handleCredentialResponse(response) {
       const jwt = parseJwt(response.credential);
       userEmail = jwt.email;
-      document.getElementById("prompt").disabled = false;
+      document.getElementById("keyword").disabled = false;
       document.getElementById("submitBtn").disabled = false;
       saveEmailToSheet(userEmail);
     }
@@ -106,24 +101,13 @@
       });
     }
 
-    async function getResponse() {
-      const userPrompt = document.getElementById("prompt").value;
+    function redirectToGPT() {
       const code = document.getElementById("keyword").value;
       if (code !== keyword) {
         alert("Invalid access code. Please enter the correct keyword or contact support.");
         return;
       }
-      const chatOutput = document.getElementById("chatOutput");
-      chatOutput.innerText = "Thinking...";
-
-   const response = await fetch("/api/generate", {
-  method: "POST",
-  body: JSON.stringify({ prompt: userPrompt }),
-  headers: { "Content-Type": "application/json" }
-});
-
-      const data = await response.json();
-      chatOutput.innerText = data.response || "No response received.";
+      window.location.href = redirectLink;
     }
 
     window.onload = initializeGoogleLogin;
