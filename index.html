@@ -57,7 +57,7 @@
 </head>
 <body>
   <div class="container">
-    <img class="logo" src="/C.W. Stephens Ministries-1.png" alt="Be LED Logo" />
+    <img class="logo" src="C.W. Stephens Ministries-1.png" alt="Be LED Logo" />
     <h1>Be LED Curriculum</h1>
     <p class="tagline">Fueling Faith. Forming Disciples.</p>
 
@@ -67,17 +67,6 @@
 
     <div id="paypal-button-container" style="margin-top: 2rem;"></div>
     <div id="accessCodeDisplay" style="margin-top: 1rem; color: #87CEFA;"></div>
-  </div>
-
-  <!-- Access Code Modal -->
-  <div id="accessCodeModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; padding: 1rem;">
-    <div style="background: white; color: black; padding: 2rem; border-radius: 10px; max-width: 400px; text-align: center;">
-      <h2>Access Code</h2>
-      <p>Your access code is:</p>
-      <div style="font-size: 1.5rem; font-weight: bold; margin: 1rem 0;" id="accessCodeDisplayModal">People of More</div>
-      <button onclick="copyAccessCode()">Copy Code</button>
-      <button onclick="closeModal()" style="margin-top: 1rem; background: #ccc;">Close</button>
-    </div>
   </div>
 
   <script>
@@ -101,15 +90,14 @@
       userEmail = jwt.email;
       document.getElementById("keyword").disabled = false;
       document.getElementById("submitBtn").disabled = false;
-      saveEmailToSheet(userEmail);
-      showAccessCodeModal();
+      saveEmailOnly(userEmail);
     }
 
     function parseJwt(token) {
       return JSON.parse(atob(token.split('.')[1]));
     }
 
-    async function saveEmailToSheet(email) {
+    async function saveEmailOnly(email) {
       await fetch("https://script.google.com/macros/s/AKfycbwToVW7uWEboX53PMivCS6gTl8MZX8So3IIwFrComAiYpqNXF-_fD9FhuSM_1yMQek-bA/exec", {
         method: "POST",
         body: JSON.stringify({ email }),
@@ -139,12 +127,12 @@
       const expiration = new Date();
       expiration.setFullYear(expiration.getFullYear() + 1);
 
-      fetch("https://script.google.com/macros/s/AKfycby6MWAFLh7BvGZ9zEZ9-qoAiVgDqf_8B17xBqvXrbswAWRkFCkfaDawE32wKPLK_vxM2A/exec", {
+      fetch("https://script.google.com/macros/s/AKfycbwToVW7uWEboX53PMivCS6gTl8MZX8So3IIwFrComAiYpqNXF-_fD9FhuSM_1yMQek-bA/exec", {
         method: "POST",
         body: JSON.stringify({
           email,
           code,
-          expiration: expiration.toISOString()
+          expiresAt: expiration.toISOString()
         }),
         headers: { "Content-Type": "application/json" }
       });
@@ -153,7 +141,11 @@
     paypal.Buttons({
       createOrder: function (data, actions) {
         return actions.order.create({
-          purchase_units: [{ amount: { value: "10.00" } }]
+          purchase_units: [{
+            amount: {
+              value: "10.00"
+            }
+          }]
         });
       },
       onApprove: function (data, actions) {
@@ -162,29 +154,13 @@
           const code = generateCode();
           document.getElementById("accessCodeDisplay").innerText =
             `Your Access Code (save this!): ${code}`;
-          document.getElementById("accessCodeDisplayModal").innerText = code;
-          showAccessCodeModal();
           saveAccessCode(email, code);
         });
       }
     }).render('#paypal-button-container');
 
-    function showAccessCodeModal() {
-      document.getElementById("accessCodeModal").style.display = "flex";
-    }
-
-    function closeModal() {
-      document.getElementById("accessCodeModal").style.display = "none";
-    }
-
-    function copyAccessCode() {
-      const code = document.getElementById("accessCodeDisplayModal").innerText;
-      navigator.clipboard.writeText(code).then(() => {
-        alert("Access code copied to clipboard!");
-      });
-    }
-
     window.onload = initializeGoogleLogin;
   </script>
 </body>
 </html>
+"""
