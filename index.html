@@ -53,16 +53,20 @@
     }
   </style>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://www.paypal.com/sdk/js?client-id=AfTLvRYC9rrFWY8weMRM4UNjLidDoNXq_aP8gnlHFr3pTfzgR3aQdc-iJVekYuVpHaD5c1KVeZ_WAM5a&currency=USD"></script>
 </head>
 <body>
   <div class="container">
-    <img class="logo" src="C.W. Stephens Ministries-1.png" alt="Be LED Logo" />
+    <img class="logo" src="C.W.%20Stephens%20Ministries-1.png" alt="Be LED Logo" />
     <h1>Be LED Curriculum</h1>
     <p class="tagline">Fueling Faith. Forming Disciples.</p>
 
     <div id="signinDiv"></div>
     <input type="text" id="keyword" placeholder="Enter access code or keyword" disabled />
     <button onclick="redirectToGPT()" disabled id="submitBtn">Access Curriculum</button>
+
+    <div id="paypal-button-container" style="margin-top: 2rem;"></div>
+    <div id="accessCodeDisplay" style="margin-top: 1rem; color: #87CEFA;"></div>
   </div>
 
   <script>
@@ -109,6 +113,51 @@
       }
       window.location.href = redirectLink;
     }
+
+    function generateCode() {
+      const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      let code = "";
+      for (let i = 0; i < 8; i++) {
+        code += charset.charAt(Math.floor(Math.random() * charset.length));
+      }
+      return code;
+    }
+
+    function saveAccessCode(email, code) {
+      const expiration = new Date();
+      expiration.setFullYear(expiration.getFullYear() + 1);
+
+      fetch("https://script.google.com/macros/s/AKfycby6MWAFLh7BvGZ9zEZ9-qoAiVgDqf_8B17xBqvXrbswAWRkFCkfaDawE32wKPLK_vxM2A/exec", {
+        method: "POST",
+        body: JSON.stringify({
+          email,
+          code,
+          expiration: expiration.toISOString()
+        }),
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    paypal.Buttons({
+      createOrder: function (data, actions) {
+        return actions.order.create({
+          purchase_units: [{
+            amount: {
+              value: "10.00"
+            }
+          }]
+        });
+      },
+      onApprove: function (data, actions) {
+        return actions.order.capture().then(function (details) {
+          const email = details.payer.email_address;
+          const code = generateCode();
+          document.getElementById("accessCodeDisplay").innerText =
+            `Your Access Code (save this!): ${code}`;
+          saveAccessCode(email, code);
+        });
+      }
+    }).render('#paypal-button-container');
 
     window.onload = initializeGoogleLogin;
   </script>
