@@ -98,9 +98,11 @@
     }
 
     async function saveEmailOnly(email) {
+      const payload = { email };
+      console.log("📧 Saving email:", payload);
       await fetch("https://script.google.com/macros/s/AKfycbwToVW7uWEboX53PMivCS6gTl8MZX8So3IIwFrComAiYpqNXF-_fD9FhuSM_1yMQek-bA/exec", {
         method: "POST",
-        body: JSON.stringify({ email }),
+        body: JSON.stringify(payload),
         headers: { "Content-Type": "application/json" }
       });
     }
@@ -127,15 +129,24 @@
       const expiration = new Date();
       expiration.setFullYear(expiration.getFullYear() + 1);
 
+      const payload = {
+        email: email,
+        code: code,
+        expiresAt: expiration.toISOString()
+      };
+
+      console.log("📤 Sending access code to Google Sheets:", payload);
+
       fetch("https://script.google.com/macros/s/AKfycbwToVW7uWEboX53PMivCS6gTl8MZX8So3IIwFrComAiYpqNXF-_fD9FhuSM_1yMQek-bA/exec", {
         method: "POST",
-        body: JSON.stringify({
-          email,
-          code,
-          expiresAt: expiration.toISOString()
-        }),
-        headers: { "Content-Type": "application/json" }
-      });
+        body: JSON.stringify(payload),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      .then(res => res.text())
+      .then(data => console.log("✅ Google Sheet response:", data))
+      .catch(error => console.error("❌ Error saving access code:", error));
     }
 
     paypal.Buttons({
@@ -154,6 +165,7 @@
           const code = generateCode();
           document.getElementById("accessCodeDisplay").innerText =
             `Your Access Code (save this!): ${code}`;
+          document.getElementById("keyword").value = code;
           saveAccessCode(email, code);
         });
       }
