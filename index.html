@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -59,20 +58,30 @@
   <div class="container">
     <img class="logo" src="C.W. Stephens Ministries-1.png" alt="Be LED Logo" />
     <h1>Be LED Curriculum</h1>
-    <p class="tagline">Fueling Faith. Forming Disciples.</p>
+    <p class="tagline">Fueling Faith. Forming Disciples.</p><div id="signinDiv"></div>
+<input type="text" id="keyword" placeholder="Enter access code or keyword" disabled />
+<button onclick="redirectToGPT()" disabled id="submitBtn">Access Curriculum</button>
 
-    <div id="signinDiv"></div>
-    <input type="text" id="keyword" placeholder="Enter access code or keyword" disabled />
-    <button onclick="redirectToGPT()" disabled id="submitBtn">Access Curriculum</button>
+<div id="paypal-button-container" style="margin-top: 2rem;"></div>
+<div id="accessCodeDisplay" style="margin-top: 1rem; color: #87CEFA;"></div>
 
-    <div id="paypal-button-container" style="margin-top: 2rem;"></div>
-    <div id="accessCodeDisplay" style="margin-top: 1rem; color: #87CEFA;"></div>
-  </div>
-
-  <script>
+  </div>  <script>
     let userEmail = null;
-    const keyword = "People of More";
+    const alwaysValidCode = "People of More";
     const redirectLink = "https://chatgpt.com/g/g-67df00ce9080819185d8710d376128d2-be-led-curriculum";
+
+    const staticAccessCodes = [
+      "W4VKY6EN", "9XM72RQL", "B8CTKJ29", "D4FZ1LYM", "K6JWUTP9",
+      "Y5C8QWRT", "J3XZNEVA", "M2RPGD78", "T7QUKZ04", "L1BCE9QW",
+      "NPZKYFX3", "ZX38DMQL", "A6VRJUPQ", "EUQ92MKT", "GKWV4BX9",
+      "CDE81UPY", "VBTX2FRM", "YMQ7CEKZ", "XKJTLNP3", "WTVRQYZ5",
+      "HM3BP8XD", "RPKLNCX2", "TUXVFQYM", "BQL49GNV", "NCG7RKM1",
+      "J8WPNXZR", "ZLR3XTQD", "YPLBX84N", "SMTVRZYE", "KX9TPDNJ",
+      "VDMUTKY2", "HRBCWZ5L", "NXZUPL3M", "PYE3V4BC", "FKV2M9TQ",
+      "GXMT5DRP", "WL9FUZBQ", "EKTXMQ7P", "YJXTPZNC", "QBPLRDXY",
+      "ZYW9LUKT", "VMRQWY85", "M3KPT9XE", "DLM9BQTZ", "LPZ7XWTY",
+      "TKX3JWUP", "ZMBTXRVE", "PQTNWUL3", "FVMXPTZK", "WYQPLUXM"
+    ];
 
     function initializeGoogleLogin() {
       google.accounts.id.initialize({
@@ -90,88 +99,42 @@
       userEmail = jwt.email;
       document.getElementById("keyword").disabled = false;
       document.getElementById("submitBtn").disabled = false;
-      saveEmailOnly(userEmail);
     }
 
     function parseJwt(token) {
       return JSON.parse(atob(token.split('.')[1]));
     }
 
-    async function saveEmailOnly(email) {
-      const payload = { email };
-      console.log("📧 Saving email:", payload);
-      await fetch("https://script.google.com/macros/s/AKfycbwToVW7uWEboX53PMivCS6gTl8MZX8So3IIwFrComAiYpqNXF-_fD9FhuSM_1yMQek-bA/exec", {
-        method: "POST",
-        body: JSON.stringify(payload),
-        headers: { "Content-Type": "application/json" }
-      });
-    }
-
     function redirectToGPT() {
-      const code = document.getElementById("keyword").value;
-      if (code !== keyword) {
-        alert("Invalid access code. Please enter the correct keyword or contact support.");
-        return;
+      const code = document.getElementById("keyword").value.trim();
+      if (code === alwaysValidCode || staticAccessCodes.includes(code)) {
+        window.location.href = redirectLink;
+      } else {
+        alert("Invalid access code. Please enter the correct code or contact support.");
       }
-      window.location.href = redirectLink;
     }
 
-    function generateCode() {
-      const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-      let code = "";
-      for (let i = 0; i < 8; i++) {
-        code += charset.charAt(Math.floor(Math.random() * charset.length));
-      }
-      return code;
-    }
-
-    function saveAccessCode(email, code) {
-      const expiration = new Date();
-      expiration.setFullYear(expiration.getFullYear() + 1);
-
-      const payload = {
-        email: email,
-        code: code,
-        expiresAt: expiration.toISOString()
-      };
-
-      console.log("📤 Sending access code to Google Sheets:", payload);
-
-      fetch("https://script.google.com/macros/s/AKfycbwToVW7uWEboX53PMivCS6gTl8MZX8So3IIwFrComAiYpqNXF-_fD9FhuSM_1yMQek-bA/exec", {
-        method: "POST",
-        body: JSON.stringify(payload),
-        headers: {
-          "Content-Type": "application/json"
-        }
-      })
-      .then(res => res.text())
-      .then(data => console.log("✅ Google Sheet response:", data))
-      .catch(error => console.error("❌ Error saving access code:", error));
+    function getRandomStaticCode() {
+      const randomIndex = Math.floor(Math.random() * staticAccessCodes.length);
+      return staticAccessCodes[randomIndex];
     }
 
     paypal.Buttons({
       createOrder: function (data, actions) {
         return actions.order.create({
-          purchase_units: [{
-            amount: {
-              value: "10.00"
-            }
-          }]
+          purchase_units: [{ amount: { value: "10.00" } }]
         });
       },
       onApprove: function (data, actions) {
         return actions.order.capture().then(function (details) {
-          const email = details.payer.email_address;
-          const code = generateCode();
+          const code = getRandomStaticCode();
           document.getElementById("accessCodeDisplay").innerText =
             `Your Access Code (save this!): ${code}`;
           document.getElementById("keyword").value = code;
-          saveAccessCode(email, code);
         });
       }
     }).render('#paypal-button-container');
 
     window.onload = initializeGoogleLogin;
-  </script>
-</body>
+  </script></body>
 </html>
