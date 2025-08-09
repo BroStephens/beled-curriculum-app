@@ -6,7 +6,6 @@
   ],
   "routes": [
     { "src": "/api/generate", "dest": "api/generate.js" },
-    { "src": "/(.*\\.png)", "dest": "/public/$1" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
