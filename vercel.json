@@ -5,7 +5,8 @@
     { "src": "index.html", "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "/api/generate", "dest": "api/generate.js" },
+    { "src": "/api/generate", "dest": "/api/generate.js" },
+    { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
